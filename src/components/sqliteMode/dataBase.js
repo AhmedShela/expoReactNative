@@ -7,19 +7,16 @@ export default class Database {
     initDB() {
 
           console.log("Database OPEN");
-          db.executeSql('SELECT 1 FROM MntOrder LIMIT 1').then(() => {
+          db.transaction(tx =>{
+            tx.executeSql('SELECT * FROM MntOrder LIMIT 1',null,()=>{
               console.log("Database is ready ... executing query ...");
-          }).catch((error) =>{
+            },(error)=>{
               console.log("Received error: ", error);
-              console.log("Database not yet ready ... populating data");
-              db.transaction((tx) => {
-                  tx.executeSql('CREATE TABLE IF NOT EXISTS MntOrder (orderNumber)');
-              }).then(() => {
-                  console.log("Table created successfully");
-              }).catch(error => {
-                  console.log(error);
-              });
-          });
+              tx.executeSql('CREATE TABLE IF NOT EXISTS MntOrder (orderNumber)',null,
+              ()=>{console.log("Table created successfully");},
+              (error)=>{console.log(error);})
+            })
+          })
       };
 
       closeDatabase(db) {
